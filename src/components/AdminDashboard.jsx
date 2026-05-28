@@ -8,7 +8,7 @@ const blankProject = {
   title: "",
   category: "Web Platform",
   featured: false,
-  image: "",
+  images: ["", "", "", "", ""],
   description: "",
   technologies: [],
   githubUrl: "",
@@ -41,8 +41,8 @@ function Login({ onLogin }) {
     const API_URL = import.meta.env.VITE_API_URL || "https://myportfolio-backendready.onrender.com";
 
     try {
-      // This points to the Django SimpleJWT token endpoint
-      const res = await fetch(`${API_URL}/api/token/`, {
+      // Points to our new Express login endpoint
+      const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -168,7 +168,7 @@ export default function AdminDashboard({ onExit }) {
             <div className="admin-list">
               {projects.map((item, index) => (
                 <button className={index === selectedProject ? "active" : ""} key={item.id} onClick={() => setSelectedProject(index)}>
-                  <img src={item.image} alt="" />
+                  <img src={item.images?.[0] || item.image} alt="" />
                   <span>
                     <strong>{item.title || "Untitled project"}</strong>
                     <small>{item.category}</small>
@@ -232,6 +232,24 @@ export default function AdminDashboard({ onExit }) {
                   setProjects((items) => items.map((item, index) => (index === selectedProject ? { ...item, liveUrl: value } : item)))
                 }
               />
+              <div className="admin-field">
+                <span>Project Images (5 Slots)</span>
+                <div style={{ display: "grid", gap: "8px" }}>
+                  {[0, 1, 2, 3, 4].map((idx) => (
+                    <input
+                      key={idx}
+                      placeholder={`Image URL ${idx + 1}`}
+                      value={project.images?.[idx] || ""}
+                      onChange={(e) => {
+                        const newImages = [...(project.images || ["", "", "", "", ""])];
+                        newImages[idx] = e.target.value;
+                        setProjects((items) => items.map((item, index) => (index === selectedProject ? { ...item, images: newImages } : item)));
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <label className="admin-check">
                 <input
                   type="checkbox"

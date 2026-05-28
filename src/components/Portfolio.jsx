@@ -1,15 +1,18 @@
 import { motion } from "framer-motion";
 import {
   ArrowUpRight,
+  Chrome,
   Code2,
+  Cpu,
   Database,
   Download,
   Github,
   Layers3,
   Mail,
   Menu,
+  MessageSquare,
   Moon,
-  Rocket,
+  Server,
   Sun,
   X,
 } from "lucide-react";
@@ -20,10 +23,25 @@ import { loadCollection } from "../lib/storage";
 
 const navItems = ["About", "Projects", "Skills", "Journey", "Services", "Contact"];
 
-function Navbar({ darkMode, setDarkMode, openAdmin, activeSection }) {
+// Mapping technology names to suitable icons
+const TechIcon = React.memo(({ name }) => {
+  const n = name.toLowerCase();
+  if (n.includes("react") || n.includes("javascript") || n.includes("frontend")) return <Chrome size={16} />;
+  if (n.includes("python") || n.includes("django") || n.includes("node") || n.includes("backend")) return <Server size={16} />;
+  if (n.includes("db") || n.includes("sql") || n.includes("postgres")) return <Database size={16} />;
+  return <Cpu size={16} />;
+});
+
+function Navbar({ darkMode, setDarkMode, activeSection }) {
   const [open, setOpen] = useState(false);
+
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "unset";
+  }, [open]);
+
   return (
-    <header className="site-nav">
+    <header className={`site-nav ${open ? "menu-is-open" : ""}`}>
       <a className="brand-mark" href="#home">
         <span>DT</span>
         <strong>{profile.brand}</strong>
@@ -39,13 +57,10 @@ function Navbar({ darkMode, setDarkMode, openAdmin, activeSection }) {
             {item}
           </a>
         ))}
-        <button type="button" onClick={openAdmin}>
-          Admin
-        </button>
       </nav>
       <div className="nav-actions">
         <button className="icon-button" type="button" onClick={() => setDarkMode((value) => !value)} aria-label="Toggle theme">
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>
         <button className="icon-button mobile-menu" type="button" onClick={() => setOpen((value) => !value)} aria-label="Open menu">
           {open ? <X size={19} /> : <Menu size={19} />}
@@ -55,8 +70,50 @@ function Navbar({ darkMode, setDarkMode, openAdmin, activeSection }) {
   );
 }
 
-function Hero({ projects, openAdmin }) {
-  const featured = projects.find((project) => project.featured) || projects[0];
+function PremiumTypewriter({ text }) {
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [typingSpeed, setTypingSpeed] = useState(100);
+
+  useEffect(() => {
+    const handleType = () => {
+      const fullText = text;
+      const updatedText = isDeleting
+        ? fullText.substring(0, displayText.length - 1)
+        : fullText.substring(0, displayText.length + 1);
+
+      setDisplayText(updatedText);
+
+      if (!isDeleting && updatedText === fullText) {
+        setTypingSpeed(2000); // Pause at end
+        setIsDeleting(true);
+      } else if (isDeleting && updatedText === "") {
+        setIsDeleting(false);
+        setTypingSpeed(500);
+      } else {
+        setTypingSpeed(isDeleting ? 40 : 100);
+      }
+    };
+
+    const timer = setTimeout(handleType, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, typingSpeed, text]);
+
+  return (
+    <span className="typewriter-container">
+      <span className="typewriter-text">{displayText}</span>
+      <motion.span
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+        className="typewriter-cursor"
+      />
+    </span>
+  );
+}
+
+function Hero({ projects }) {
+  const featured = useMemo(() => projects.find((p) => p.featured) || projects[0], [projects]);
+
   return (
     <section className="hero-section" id="home">
       <div className="hero-grid">
@@ -67,11 +124,11 @@ function Hero({ projects, openAdmin }) {
           transition={{ duration: 0.6 }}
         >
           <span className="hero-kicker">
-            <Rocket size={16} />
-            Software engineer and product builder
+            <Code2 size={16} />
+            <PremiumTypewriter text="Hazzan Adedotun — Full-Stack Developer" />
           </span>
           <h1>
-            Building premium digital products with <em>clarity, speed, and craft.</em>
+            <PremiumTypewriter text="Building premium digital products with clarity, speed, and craft." />
           </h1>
           <p>{profile.summary}</p>
           <div className="hero-actions">
@@ -79,9 +136,6 @@ function Hero({ projects, openAdmin }) {
             <ButtonLink href="#contact" variant="secondary">
               Contact me
             </ButtonLink>
-            <button className="btn ghost" type="button" onClick={openAdmin}>
-              Open admin
-            </button>
           </div>
           <div className="stats-row">
             {stats.map((item) => (
@@ -113,7 +167,7 @@ function Hero({ projects, openAdmin }) {
             </div>
           </div>
           <div className="current-project">
-            <img src={featured?.image} alt={featured?.title} />
+            <img src={featured?.images?.[0] || featured?.image} alt={featured?.title} />
             <div>
               <span>Current showcase</span>
               <strong>{featured?.title}</strong>
@@ -134,7 +188,7 @@ function ProjectCard({ project }) {
   return (
     <MagneticCard className="project-card">
       <div className="project-image">
-        <img src={project.image} alt={project.title} />
+        <img src={project.images?.[0] || project.image} alt={project.title} />
         {project.featured && <span>Featured</span>}
       </div>
       <div className="project-body">
@@ -143,7 +197,10 @@ function ProjectCard({ project }) {
         <p>{project.description}</p>
         <div className="badge-row">
           {project.technologies.map((tech) => (
-            <Badge key={tech}>{tech}</Badge>
+            <Badge key={tech}>
+              <TechIcon name={tech} />
+              {tech}
+            </Badge>
           ))}
         </div>
         <div className="project-actions">
@@ -236,10 +293,9 @@ export default function Portfolio({ openAdmin }) {
       <Navbar 
         darkMode={darkMode} 
         setDarkMode={setDarkMode} 
-        openAdmin={openAdmin} 
         activeSection={activeSection} 
       />
-      <Hero projects={projects} openAdmin={openAdmin} />
+      <Hero projects={projects} />
 
       <Section id="about" eyebrow="About" title="Engineer with product taste and full-stack execution.">
         <div className="about-grid">
@@ -247,11 +303,26 @@ export default function Portfolio({ openAdmin }) {
             <img className="about-image" src={profile.aboutImage} alt={profile.name} />
           </MagneticCard>
           <div className="about-copy">
+          <div className="about-bio">
             <p>
-              I build scalable, user-friendly applications using React, Python/Django, JavaScript, and PostgreSQL. My
-              focus is clean architecture, thoughtful interfaces, and systems that can grow from portfolio demo to
-              production platform.
+              I’m <strong>{profile.name}</strong>, a software developer focused on building modern, scalable, and
+              user-centered web applications. I enjoy transforming ideas into real products with clean architecture,
+              responsive interfaces, and smooth user experiences.
             </p>
+            <p>
+              My primary stack includes <strong>React</strong> for frontend development and <strong>Django</strong> for
+              backend systems, with experience building real-time applications using WebSockets and modern APIs. I’m
+              passionate about creating products that are not only functional but also visually polished.
+            </p>
+            <p>
+              I enjoy working on projects involving real-time communication, SaaS platforms, and interactive web
+              experiences. Currently, I’m actively building and improving <strong>".connect"</strong> — a modern
+              communication platform designed with scalability and premium user experience in mind.
+            </p>
+            <p>
+              I’m constantly learning, experimenting with new technologies, and improving my development workflow to build production-ready applications that solve real problems.
+            </p>
+          </div>
             <div className="capability-grid">
               <span>
                 <Code2 /> Frontend systems
@@ -279,9 +350,12 @@ export default function Portfolio({ openAdmin }) {
         <div className="skills-grid">
           {skills.map((skill) => (
             <MagneticCard className="skill-card" key={skill.name}>
-              <div>
-                <strong>{skill.name}</strong>
-                <span>{skill.group}</span>
+              <div className="skill-header">
+                <TechIcon name={skill.name} />
+                <div>
+                  <strong>{skill.name}</strong>
+                  <span>{skill.group}</span>
+                </div>
               </div>
               <i>
                 <b style={{ width: `${skill.level}%` }} />
@@ -291,13 +365,23 @@ export default function Portfolio({ openAdmin }) {
         </div>
       </Section>
 
-      <Section id="journey" eyebrow="Journey" title="A focused path toward scalable engineering.">
+      <Section id="journey" eyebrow="Experience" title="Technical expertise and product development.">
         <div className="timeline">
           {timeline.map((item) => (
             <MagneticCard className="timeline-item" key={item.title}>
               <span>{item.period}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
+              <div className="experience-content">
+                <h3>{item.title}</h3>
+                {item.points ? (
+                  <ul className="experience-list">
+                    {item.points.map((p, i) => (
+                      <li key={i}>{p}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{item.body}</p>
+                )}
+              </div>
             </MagneticCard>
           ))}
         </div>
@@ -307,7 +391,6 @@ export default function Portfolio({ openAdmin }) {
         <div className="service-grid">
           {services.map((service) => (
             <MagneticCard key={service}>
-              <Rocket size={20} />
               <h3>{service}</h3>
             </MagneticCard>
           ))}
@@ -316,11 +399,22 @@ export default function Portfolio({ openAdmin }) {
 
       <Section id="testimonials" eyebrow="Proof" title="What collaborators notice.">
         <div className="testimonial-grid">
-          {testimonials.map((item) => (
-            <MagneticCard key={item.name}>
-              <p>"{item.quote}"</p>
-              <strong>{item.name}</strong>
-              <span>{item.role}</span>
+          {testimonials.map((item, idx) => (
+            <MagneticCard 
+              key={item.name} 
+              className="testimonial-card"
+              initial={{ opacity: 0, rotateX: -20, y: 30 }}
+              whileInView={{ opacity: 1, rotateX: 0, y: 0 }}
+              transition={{ duration: 0.6, delay: idx * 0.1 }}
+            >
+              <div className="testimonial-header">
+                <img src={item.avatar} alt={item.name} className="commenter-thumb" />
+                <div>
+                  <strong>{item.name}</strong>
+                  <span>{item.role}</span>
+                </div>
+              </div>
+              <p className="testimonial-quote">"{item.quote}"</p>
             </MagneticCard>
           ))}
         </div>
@@ -342,6 +436,10 @@ export default function Portfolio({ openAdmin }) {
             </div>
           </div>
           <form onSubmit={handleContactSubmit}>
+            <div className="contact-quick-links">
+              <a href={`mailto:${profile.email}`} className="quick-link"><Mail size={16}/> {profile.email}</a>
+              <a href="https://wa.me/2348165596993" target="_blank" rel="noreferrer" className="quick-link whatsapp"><MessageSquare size={16}/> WhatsApp Chat</a>
+            </div>
             <input name="name" placeholder="Your name" required />
             <input name="email" type="email" placeholder="Email address" required />
             <textarea name="message" placeholder="Tell me what you want to build" required />
@@ -358,6 +456,10 @@ export default function Portfolio({ openAdmin }) {
           </form>
         </div>
       </Section>
+      <footer className="simple-footer">
+        <p>&copy; {new Date().getFullYear()} {profile.name}</p>
+        <a href="#admin" onClick={(e) => { e.preventDefault(); openAdmin(); }} className="admin-trigger">Admin Access</a>
+      </footer>
     </main>
   );
 }

@@ -17,6 +17,7 @@ export const profile = {
     { label: "GitHub", href: "https://github.com/Engrdotman" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/hazzan-lawal-434326354" },
     { label: "Twitter", href: "https://x.com/engrdotman_" },
+    { label: "WhatsApp", href: "https://wa.me/2348165596993" },
   ],
 };
 
@@ -104,19 +105,32 @@ export const projects = [
 
 export const timeline = [
   {
-    period: "Now",
-    title: "Building product-grade full-stack platforms",
-    body: "Designing scalable React experiences with API-first Django architecture, dynamic admin workflows, and PostgreSQL-backed content.",
+    period: "Frontend",
+    title: "Interactive UI/UX",
+    points: [
+      "Building responsive web applications using React",
+      "Creating reusable component architectures and scalable systems",
+      "Developing modern UI/UX with Tailwind CSS and Framer Motion",
+      "Implementing real-time features and dynamic interfaces",
+    ],
   },
   {
-    period: "2026",
-    title: "Realtime communication systems",
-    body: "Developed chat app features around sessions, messages, uploads, group spaces, stories, and realtime interactions.",
+    period: "Backend",
+    title: "API & Infrastructure",
+    points: [
+      "Building REST APIs with Django REST Framework",
+      "Developing realtime systems using Django Channels and WebSockets",
+      "Managing authentication, databases, and server-side integrations",
+    ],
   },
   {
-    period: "Foundation",
-    title: "Frontend and Python foundations",
-    body: "Built landing pages, games, portfolio interfaces, and Python GUI projects while strengthening product UI judgment.",
+    period: "Product",
+    title: "Full-Stack Solutions",
+    points: [
+      "Developing '.connect' — a realtime communication platform",
+      "Building multi-tenant receipt management systems",
+      "Focusing on usability, performance, and clean system design",
+    ],
   },
 ];
 
@@ -133,12 +147,14 @@ export const testimonials = [
   {
     name: "Product Founder",
     role: "Early-stage SaaS",
+    avatar: "https://i.pravatar.cc/150?u=founder",
     quote:
       "Hazzan brings strong product instincts to engineering work. The UI felt polished, focused, and easy to extend.",
   },
   {
     name: "Project Collaborator",
     role: "Web platform build",
+    avatar: "https://i.pravatar.cc/150?u=collab",
     quote:
       "The work was clean, responsive, and practical. He thinks about both the user experience and the backend structure.",
   },
