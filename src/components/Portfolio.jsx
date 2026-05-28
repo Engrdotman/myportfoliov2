@@ -238,7 +238,7 @@ export default function Portfolio({ openAdmin }) {
   const [testimonials, setTestimonials] = useState(() => loadCollection("testimonials"));
   const [services, setServices] = useState(() => {
     const saved = loadCollection("services");
-    return saved.length ? saved : staticServices;
+    return saved && saved.length ? saved : staticServices;
   });
   const [activeSection, setActiveSection] = useState("");
   const [status, setStatus] = useState({ submitting: false, success: null });
@@ -289,7 +289,7 @@ export default function Portfolio({ openAdmin }) {
       setSkills(loadCollection("skills"));
       setTestimonials(loadCollection("testimonials"));
       const savedServices = loadCollection("services");
-      setServices(savedServices.length ? savedServices : staticServices);
+      setServices(savedServices && savedServices.length ? savedServices : staticServices);
     };
     window.addEventListener("storage", sync);
     window.addEventListener("portfolio-data", sync);

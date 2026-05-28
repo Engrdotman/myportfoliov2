@@ -108,7 +108,7 @@ export default function AdminDashboard({ onExit }) {
   const [testimonials, setTestimonials] = useState(() => loadCollection("testimonials"));
   const [services, setServices] = useState(() => {
     const saved = loadCollection("services");
-    return saved.length ? saved : staticServices;
+    return saved && saved.length ? saved : staticServices;
   });
   const [selectedProject, setSelectedProject] = useState(0);
 
