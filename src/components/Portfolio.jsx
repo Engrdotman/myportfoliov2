@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { Badge, ButtonLink, MagneticCard, Section } from "./ui";
-import { profile, services, stats, timeline } from "../data/portfolio";
+import { profile, services as staticServices, stats, timeline } from "../data/portfolio";
 import { loadCollection } from "../lib/storage";
 
 const navItems = ["About", "Projects", "Skills", "Journey", "Services", "Contact"];
@@ -101,12 +101,16 @@ function PremiumTypewriter({ text }) {
 
   return (
     <span className="typewriter-container">
-      <span className="typewriter-text">{displayText}</span>
-      <motion.span
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-        className="typewriter-cursor"
-      />
+      {/* Invisible ghost text reserves space to prevent layout jitter */}
+      <span className="typewriter-ghost" aria-hidden="true">{text}</span>
+      <span className="typewriter-visible">
+        <span className="typewriter-text">{displayText}</span>
+        <motion.span
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+          className="typewriter-cursor"
+        />
+      </span>
     </span>
   );
 }
@@ -115,72 +119,74 @@ function Hero({ projects }) {
   const featured = useMemo(() => projects.find((p) => p.featured) || projects[0], [projects]);
 
   return (
-    <section className="hero-section" id="home">
-      <div className="hero-grid">
-        <motion.div
-          className="hero-copy"
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="hero-kicker">
-            <Code2 size={16} />
-            <PremiumTypewriter text="Hazzan Adedotun — Full-Stack Developer" />
-          </span>
-          <h1>
-            <PremiumTypewriter text="Building premium digital products with clarity, speed, and craft." />
-          </h1>
-          <p>{profile.summary}</p>
-          <div className="hero-actions">
-            <ButtonLink href="#projects">Explore projects</ButtonLink>
-            <ButtonLink href="#contact" variant="secondary">
-              Contact me
-            </ButtonLink>
-          </div>
-          <div className="stats-row">
-            {stats.map((item) => (
-              <div key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+    <div className="hero-isolation-wrapper">
+      <section className="hero-section" id="home">
+        <div className="hero-grid">
+          <motion.div
+            className="hero-copy"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="hero-kicker">
+              <Code2 size={16} />
+              <PremiumTypewriter text="Hazzan Adedotun — Full-Stack Developer" />
+            </span>
+            <h1>
+              <PremiumTypewriter text="Building premium digital products with clarity, speed, and craft." />
+            </h1>
+            <p>{profile.summary}</p>
+            <div className="hero-actions">
+              <ButtonLink href="#projects">Explore projects</ButtonLink>
+              <ButtonLink href="#contact" variant="secondary">
+                Contact me
+              </ButtonLink>
+            </div>
+            <div className="stats-row">
+              {stats.map((item) => (
+                <div key={item.label}>
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
 
-        <motion.div
-          className="hero-console"
-          initial={{ opacity: 0, scale: 0.96, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.12 }}
-        >
-          <div className="console-top">
-            <span />
-            <span />
-            <span />
-            <b>current-build.tsx</b>
-          </div>
-          <div className="profile-orbit">
-            <img src={profile.avatar} alt={profile.name} />
-            <div>
-              <strong>{profile.name}</strong>
-              <span>{profile.role}</span>
+          <motion.div
+            className="hero-console"
+            initial={{ opacity: 0, scale: 0.96, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.12 }}
+          >
+            <div className="console-top">
+              <span />
+              <span />
+              <span />
+              <b>current-build.tsx</b>
             </div>
-          </div>
-          <div className="current-project">
-            <img src={featured?.images?.[0] || featured?.image} alt={featured?.title} />
-            <div>
-              <span>Current showcase</span>
-              <strong>{featured?.title}</strong>
-              <p>{featured?.description}</p>
+            <div className="profile-orbit">
+              <img src={profile.avatar} alt={profile.name} />
+              <div>
+                <strong>{profile.name}</strong>
+                <span>{profile.role}</span>
+              </div>
             </div>
-          </div>
-          <div className="code-lines">
-            <span>const stack = ["React", "Django", "PostgreSQL"];</span>
-            <span>{'ship(product.with({ polish: "premium" }));'}</span>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+            <div className="current-project">
+              <img src={featured?.images?.[0] || featured?.image} alt={featured?.title} />
+              <div>
+                <span>Current showcase</span>
+                <strong>{featured?.title}</strong>
+                <p>{featured?.description}</p>
+              </div>
+            </div>
+            <div className="code-lines">
+              <span>const stack = ["React", "Django", "PostgreSQL"];</span>
+              <span>{'ship(product.with({ polish: "premium" }));'}</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -230,8 +236,13 @@ export default function Portfolio({ openAdmin }) {
   const [projects, setProjects] = useState(() => loadCollection("projects"));
   const [skills, setSkills] = useState(() => loadCollection("skills"));
   const [testimonials, setTestimonials] = useState(() => loadCollection("testimonials"));
+  const [services, setServices] = useState(() => {
+    const saved = loadCollection("services");
+    return saved.length ? saved : staticServices;
+  });
   const [activeSection, setActiveSection] = useState("");
   const [status, setStatus] = useState({ submitting: false, success: null });
+  const [showFullBio, setShowFullBio] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
@@ -277,6 +288,8 @@ export default function Portfolio({ openAdmin }) {
       setProjects(loadCollection("projects"));
       setSkills(loadCollection("skills"));
       setTestimonials(loadCollection("testimonials"));
+      const savedServices = loadCollection("services");
+      setServices(savedServices.length ? savedServices : staticServices);
     };
     window.addEventListener("storage", sync);
     window.addEventListener("portfolio-data", sync);
@@ -314,14 +327,30 @@ export default function Portfolio({ openAdmin }) {
               backend systems, with experience building real-time applications using WebSockets and modern APIs. I’m
               passionate about creating products that are not only functional but also visually polished.
             </p>
-            <p>
-              I enjoy working on projects involving real-time communication, SaaS platforms, and interactive web
-              experiences. Currently, I’m actively building and improving <strong>".connect"</strong> — a modern
-              communication platform designed with scalability and premium user experience in mind.
-            </p>
-            <p>
-              I’m constantly learning, experimenting with new technologies, and improving my development workflow to build production-ready applications that solve real problems.
-            </p>
+            {showFullBio && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                transition={{ duration: 0.4 }}
+                style={{ overflow: "hidden" }}
+              >
+                <p>
+                  I enjoy working on projects involving real-time communication, SaaS platforms, and interactive web
+                  experiences. Currently, I’m actively building and improving <strong>".connect"</strong> — a modern
+                  communication platform designed with scalability and premium user experience in mind.
+                </p>
+                <p>
+                  I’m constantly learning, experimenting with new technologies, and improving my development workflow to build production-ready applications that solve real problems.
+                </p>
+              </motion.div>
+            )}
+            <button 
+              className="btn-text" 
+              onClick={() => setShowFullBio(!showFullBio)}
+              style={{ color: "var(--accent)", fontSize: "0.9rem", fontWeight: 600, padding: 0, marginTop: "0.5rem", background: "none", border: "none", cursor: "pointer" }}
+            >
+              {showFullBio ? "Show less" : "Read more about my background..."}
+            </button>
           </div>
             <div className="capability-grid">
               <span>
@@ -390,8 +419,19 @@ export default function Portfolio({ openAdmin }) {
       <Section id="services" eyebrow="Services" title="Ways I can help teams and founders build better.">
         <div className="service-grid">
           {services.map((service) => (
-            <MagneticCard key={service}>
-              <h3>{service}</h3>
+            <MagneticCard key={service.title || service}>
+              <div className="service-info">
+                <h3>{service.title || service}</h3>
+                {service.description && <p style={{ fontSize: '0.9rem', opacity: 0.8, marginTop: '0.5rem' }}>{service.description}</p>}
+                {service.examples && (
+                  <div style={{ marginTop: '1.25rem' }}>
+                    <small style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.5 }}>Related Examples</small>
+                    <div className="badge-row" style={{ marginTop: '0.5rem' }}>
+                      {service.examples.map(ex => <Badge key={ex}>{ex}</Badge>)}
+                    </div>
+                  </div>
+                )}
+              </div>
             </MagneticCard>
           ))}
         </div>
@@ -438,7 +478,10 @@ export default function Portfolio({ openAdmin }) {
           <form onSubmit={handleContactSubmit}>
             <div className="contact-quick-links">
               <a href={`mailto:${profile.email}`} className="quick-link"><Mail size={16}/> {profile.email}</a>
-              <a href="https://wa.me/2348165596993" target="_blank" rel="noreferrer" className="quick-link whatsapp"><MessageSquare size={16}/> WhatsApp Chat</a>
+              <a href="https://wa.me/2348165596993" target="_blank" rel="noreferrer" className="btn secondary" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>
+                <MessageSquare size={18}/> 
+                <span>Start WhatsApp Chat</span>
+              </a>
             </div>
             <input name="name" placeholder="Your name" required />
             <input name="email" type="email" placeholder="Email address" required />

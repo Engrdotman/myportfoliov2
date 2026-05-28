@@ -166,6 +166,12 @@ a {
   display: none;
 }
 
+.hero-isolation-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
 .hero-section,
 .section-shell {
   width: min(1180px, calc(100% - 32px));
@@ -205,13 +211,25 @@ a {
   font-size: clamp(38px, 6vw, 84px);
   line-height: 1.1;
   letter-spacing: 0;
-  min-height: 2.2em; /* Prevents layout shift during typing */
 }
 
 .typewriter-container {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
+  display: inline-grid;
+  grid-template-columns: 1fr;
+  vertical-align: top;
+}
+
+.typewriter-ghost {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre-wrap;
+}
+
+.typewriter-visible {
+  grid-area: 1 / 1;
+  display: inline;
 }
 
 .typewriter-text {

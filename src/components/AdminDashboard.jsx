@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ImagePlus, LayoutDashboard, Lock, LogOut, Plus, Save, Trash2 } from "lucide-react";
 import React, { useState } from "react";
-import { profile } from "../data/portfolio";
+import { profile, services as staticServices } from "../data/portfolio";
 import { loadCollection, saveCollection } from "../lib/storage";
 
 const blankProject = {
@@ -106,6 +106,10 @@ export default function AdminDashboard({ onExit }) {
   const [projects, setProjects] = useState(() => loadCollection("projects"));
   const [skills, setSkills] = useState(() => loadCollection("skills"));
   const [testimonials, setTestimonials] = useState(() => loadCollection("testimonials"));
+  const [services, setServices] = useState(() => {
+    const saved = loadCollection("services");
+    return saved.length ? saved : staticServices;
+  });
   const [selectedProject, setSelectedProject] = useState(0);
 
   const handleLogout = () => {
@@ -130,7 +134,7 @@ export default function AdminDashboard({ onExit }) {
           <span>DT</span>
           <strong>Admin</strong>
         </div>
-        {["projects", "skills", "testimonials", "content"].map((item) => (
+        {["projects", "skills", "testimonials", "services", "content"].map((item) => (
           <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>
             <LayoutDashboard size={17} />
             {item}
@@ -308,6 +312,16 @@ export default function AdminDashboard({ onExit }) {
           />
         )}
 
+        {tab === "services" && (
+          <SimpleManager
+            title="Services"
+            items={services}
+            onSave={(value) => persist("services", value, setServices)}
+            fields={["title", "description", "examples"]}
+            blank={{ title: "New Service", description: "", examples: [] }}
+          />
+        )}
+
         {tab === "content" && (
           <div className="admin-empty">
             <h2>Django integration path</h2>
@@ -341,7 +355,14 @@ function SimpleManager({ title, items, onSave, fields, blank }) {
               label={field}
               value={String(item[field] ?? "")}
               onChange={(value) =>
-                setDraft((rows) => rows.map((row, rowIndex) => (rowIndex === index ? { ...row, [field]: field === "level" ? Number(value) : value } : row)))
+                setDraft((rows) => rows.map((row, rowIndex) => (
+                  rowIndex === index 
+                    ? { ...row, [field]: field === "level" 
+                        ? Number(value) 
+                        : (field === "examples" ? value.split(",").map(s => s.trim()).filter(Boolean) : value) 
+                      } 
+                    : row
+                )))
               }
             />
           ))}
