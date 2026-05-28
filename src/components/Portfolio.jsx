@@ -322,11 +322,6 @@ export default function Portfolio({ openAdmin }) {
               user-centered web applications. I enjoy transforming ideas into real products with clean architecture,
               responsive interfaces, and smooth user experiences.
             </p>
-            <p>
-              My primary stack includes <strong>React</strong> for frontend development and <strong>Django</strong> for
-              backend systems, with experience building real-time applications using WebSockets and modern APIs. I’m
-              passionate about creating products that are not only functional but also visually polished.
-            </p>
             {showFullBio && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -334,6 +329,11 @@ export default function Portfolio({ openAdmin }) {
                 transition={{ duration: 0.4 }}
                 style={{ overflow: "hidden" }}
               >
+                <p>
+                  My primary stack includes <strong>React</strong> for frontend development and <strong>Django</strong> for
+                  backend systems, with experience building real-time applications using WebSockets and modern APIs. I’m
+                  passionate about creating products that are not only functional but also visually polished.
+                </p>
                 <p>
                   I enjoy working on projects involving real-time communication, SaaS platforms, and interactive web
                   experiences. Currently, I’m actively building and improving <strong>".connect"</strong> — a modern
